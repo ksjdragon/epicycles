@@ -1,0 +1,326 @@
+html, body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	font-family: 'Poppins', sans-serif;
+}
+
+body {
+	display: grid;
+	grid-template-columns: 25% 75%;
+	grid-template-rows: 1fr;
+	overflow-y: hidden;
+}
+
+h1, h2, h3, h4, h5 {
+	margin: 0;
+}
+
+.transition {
+	-webkit-transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
+	transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
+	-moz-transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
+	-ms-transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
+}
+
+#sidebar {
+	color: white;
+	background-color: #00897B;
+	grid-column: 1;
+	grid-row: 1;
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: 10% 8% 74% 8%;
+	box-shadow: 1px 0px 4px 2px #2c2c2c;
+	z-index: 10;
+	height: 100vh;
+}
+
+#sideTitle {
+	grid-column: 1;
+	grid-row: 2;
+	background-color: rgba(0,0,0,0.1);
+	display: grid;
+}
+
+#sidebar h1 {
+	font-weight: 400;
+	text-decoration: underline;
+	text-decoration-style: dotted;
+	margin: auto 0 auto 5%;
+}
+
+#graph {
+	width: 100%;
+	height: 100%;
+	grid-column: 2;
+	grid-row: 1;
+}
+
+#doGraph {
+	background-color: rgba(255,255,255,0.2);
+}
+
+#doGraph:hover {
+	background-color: rgba(255,255,255,0.15);
+}
+
+#canvas {
+	background-color: #EEE;
+}
+
+#setCont {
+	height: 100%;
+	overflow-y: auto;
+	overflow-x: hidden;
+	grid-column: 1;
+	grid-row: 3;
+}
+
+.set {
+	display: grid;
+	grid-template-columns: 2% 18% 40% 40%;
+	grid-template-rows: 55% 45%;
+	height: 9vh;
+	background-color: rgba(0,0,0,0.2);
+	border-bottom: 1px solid black;
+	cursor: pointer;
+}
+
+.set:first-child {
+	border-top: 1px solid black;
+}
+
+.set:hover {
+	background-color: rgba(0,0,0,0.25);
+}
+
+.color {
+	grid-column: 2;
+	grid-row: 1/3;
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: 5% 95%;
+}
+
+.color h2 {
+	grid-column: 1;
+	grid-row: 1;
+	font-size: 100%;
+	font-weight: 100;
+	margin: 0 auto 0 10%;
+}
+
+.color > div {
+	grid-column: 1;
+	grid-row: 1/3;
+	border-radius: 50px;
+	height: 4vh;
+	width: 4vh;
+	margin: auto;
+	box-shadow: inset 0 0 0 0 rgba(0,0,0,0);
+	cursor: pointer;
+}
+
+.color > div:hover {
+	box-shadow: inset 50px 0 rgba(255,255,255,0.2);
+}
+
+.colSel {
+	position: relative;
+	top: 50%;
+	left: 50%;
+	background-color:rgba(255,255,255,0.9);
+	display: none;
+	opacity: 0;
+	grid-template-columns: repeat(4, 1fr);
+	grid-template-rows: repeat(4, 1fr);
+	grid-gap: 1vh;
+	width: 500%;
+    padding: 20%;
+    border-radius: 5px;
+    z-index: 20;
+}
+
+.colSel div {
+	border-radius: 50px;
+	height: 4vh;
+	width: 4vh;
+	margin: auto;
+	box-shadow: inset 0 0 0 0 rgba(0,0,0,0);
+	cursor: pointer;
+}
+
+.colSel div:hover {
+	box-shadow: inset 50px 0 rgba(255,255,255,0.2);
+}
+
+.selected {
+	grid-column: 1;
+	grid-row: 1/3;
+	background-color: #9CCC65;
+}
+
+.name {
+	font-weight: 200;
+	margin-top: auto;
+	grid-column: 3/5;
+	grid-row: 1;
+}
+
+.terms {
+	font-weight: 100;
+	margin: auto 0 auto 0;
+	grid-column: 3;
+	grid-row: 2;
+	color: #E0E0E0;
+}
+
+.eqs {
+	font-weight: 100;
+	margin: auto 0 auto 0;
+	grid-column: 4;
+	grid-row: 2;
+	color: #E0E0E0;
+}
+
+.ondrag {
+	animation: ondrag 1s ease-in-out 0s infinite alternate;
+}
+
+@keyframes ondrag {
+	from {background-color: rgba(255,255,255,0);}
+	to {background-color: rgba(255,255,255,0.3);}
+}
+
+#clickFile {
+	background-color: rgba(0,0,0,0.1);
+	grid-column: 1;
+	grid-row: 4;
+	display: grid;
+	grid-template-columns: 80% 20%;
+	grid-template-rows: 1fr;
+	font-size: 120%;
+	cursor: pointer;
+}
+
+#clickFile:hover {
+	background-color: rgba(0,0,0,0.2);
+}
+
+#clickFile input {
+	height: 0;
+	visibility: hidden;
+}
+
+#clickFile p, #clickFile i {
+	margin: auto;
+}
+
+@keyframes spin {
+	from {transform:rotate(0deg);}
+	to {transform:rotate(360deg);}
+}
+
+.spin {
+	animation: spin 2.5s linear 0s infinite;
+}
+
+.option {
+	height: 6vh;
+	background-color: rgba(0,0,0,0.05);
+	display: grid;
+	grid-template-columns: 40% 40% 20%;
+	cursor: pointer;
+}
+
+.option:hover {
+	background-color: rgba(0,0,0,0.1);
+}
+
+.disabled {
+	background-color: rgba(0,0,0,0.15);
+	color: #AEAEAE;
+	pointer-events: none;
+}
+
+.disabled input {
+	color: #AEAEAE !important;
+}
+
+.disabled:hover {
+	background-color: rgba(0,0,0,0.15);
+}
+
+.option p {
+	margin: auto 0 auto 10%;
+	font-weight: 300;
+	font-size: 110%;
+	grid-row: 1;
+	grid-column: 3;
+	display: inline;
+}
+
+.option p:first-child {
+	grid-column: 1;
+}
+
+.option input {
+	margin: auto;
+	height: 50%;
+	width: 50%;
+	grid-row: 1;
+	grid-column: 2;
+	background-color: rgba(0,0,0,0);
+	color: white;
+	border: 0;
+	font-family: 'Poppins',sans-serif;
+	padding: 1%;
+	font-size: 110%;
+	font-weight: 300;
+	text-align: center;
+}
+
+.option input:hover {
+	background-color: rgba(0,0,0,0.05);
+}
+
+.option input:focus {
+	background-color: rgba(0,0,0,0.1);
+}
+
+input[type="number"] {
+  -webkit-appearance: textfield;
+     -moz-appearance: textfield;
+          appearance: textfield;
+
+}
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none;
+}
+
+#mathContRe, #mathContIm {
+	overflow-y: auto;
+	height: 46.9vh;
+}
+
+#mathType p {
+	grid-column: 1/3;
+	margin: auto 0 auto 5%;
+}
+
+#mathContRe {
+	display: none;
+	opacity: 0;
+}
+
+.MJXc-display {
+	font-size: 80% !important;
+}
+
+#copyBox {
+	position: absolute;
+	top: -50%;
+}
