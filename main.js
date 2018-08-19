@@ -100,11 +100,8 @@ document.querySelectorAll("#clickFile input")[0].onchange = function() {
 			return;
 		}
 		var reader = new FileReader();
-		reader.onload = function() {
-			var el = document.createElement("div");
-			el.innerHTML = reader.result;
-			svg = Array.from(el.getElementsByTagName("path")).map(a=>a.getAttribute("d").replace(/(\n|\t)/g,"")).map(a=>a[0].toUpperCase() + a.substring(1)).reduce((a,b)=>a.concat(b));
-			var [paths, range] = processSVG(svg);
+		reader.onload = function() {	
+			var [paths, range] = processSVG(reader.result);
 			var oneSet = {
 				"name": file.name.replace(".svg","").substring(0,15),
 				"color": graphColors[Math.floor(Math.random()*graphColors.length)],
@@ -121,11 +118,9 @@ document.querySelectorAll("#clickFile input")[0].onchange = function() {
 }
 
 function fileDrop(e) {
-
 	e.preventDefault();
 	document.getElementById("setCont").className = "";
 	if(!e.dataTransfer.items) return;
-	console.log(e.dataTransfer.items)
 	var diff = allSets.length;
 	for (var i = 0; i < e.dataTransfer.items.length; i++) {
 		var thisItem = e.dataTransfer.items[i];
@@ -140,10 +135,7 @@ function fileDrop(e) {
 	     		}
 	     		var reader = new FileReader();
 	     		reader.onload = function() {
-	     			var el = document.createElement("div");
-					el.innerHTML = reader.result;
-					svg = Array.from(el.getElementsByTagName("path")).map(a=>a.getAttribute("d").replace(/(\n|\t)/g,"")).reduce((a,b)=>a.concat(b));
-					var [paths, range] = processSVG(svg);
+					var [paths, range] = processSVG(reader.result);
 	     			var oneSet = {
 	     				"name": file.name.replace(".svg",""),
 	     				"color": graphColors[Math.floor(Math.random()*graphColors.length)],
@@ -915,8 +907,10 @@ function processSVG(svg) {
 		"Q": 2, "C": 3, "T": 1, "S": 2,
 		"A": 3
 	};
-	var allPaths = svg.replace(/z/gi,"").split(/(?=M)/gi);
-	console.log(allPaths.length);
+	var el = document.createElement("div");
+	el.innerHTML = svg;
+	var allPaths = Array.from(el.getElementsByTagName("path")).map(a=>a.getAttribute("d").replace(/(\n|\t)/g,"")).map(a=>a[0].toUpperCase() + a.substring(1)).reduce((a,b)=>a.concat(b));
+	allPaths = allPaths.replace(/z/gi,"").split(/(?=M)/gi);
 	var lastPoint = [0,0];
 	for(var k = 0; k < allPaths.length; k++) {
 		var processed = [];
@@ -931,12 +925,8 @@ function processSVG(svg) {
 				values = values[0].map((a,i)=>[a, (values[1][i]||0)]);
 				if(command.toUpperCase() === "V") values.reverse();
 			} else {
-				alert("The A path command in the SVG is not supported! Please modify or change the SVG file to not contain the A command.")
-				/*values = [
-					values.filter((a,i)=>i%7===0||i%4===1),
-					values.filter((a,i)=>i%7===2||i%7===3||i%7===4),
-					values.filter((a,i)=>i%7===5||i%7===6)
-				].map(a=>a.map(b=>parseFloat(b)));*/
+				alert("The A path command in the SVG is not supported! Please modify or change the SVG file to not contain the A command.");
+				return [];
 			}
 			var len = commLength[command.toUpperCase()];
 			if(values.length !== len) {
@@ -947,7 +937,6 @@ function processSVG(svg) {
 				commList.push([command].concat(values));
 			}
 		}
-		console.log([commList, k]);
 		
 		for(var i = 0; i < commList.length; i++) {
 			var command = commList[i][0];
@@ -960,7 +949,6 @@ function processSVG(svg) {
 			var offset = relOff(arrOp(lastPoint, "*", rel), points);
 			if(command === "M") {
 				lastPoint = offset[0];
-				console.log(lastPoint);
 			} else if(command === "T" || command === "S") {
 				var lastSet = processed[processed.length-1] || [lastPoint];
 				var len = lastSet.length;
@@ -980,9 +968,28 @@ function processSVG(svg) {
 			}
 
 		}
-		if(k === 0) console.log(processed);
 		allPaths[k] = processed;
 	}
+
+	var polyPaths = Array.from(el.getElementsByTagName("polygon")).map(a=>a.getAttribute("points").replace(/(\n|\t)/g,"")).concat(
+		Array.from(el.getElementsByTagName("polyline")).map(a=>a.getAttribute("points").replace(/(\n|\t)/g,"")));
+	for(var k = 0; k < polyPaths.length; k++) {
+		var processed = [];
+		var values = polyPaths[k].match(/(-)?([0-9]+)(\.([0-9])+)?/gi);
+		values = [values.filter((a,i)=>i%2===0),values.filter((a,i)=>i%2===1)].map(a=>a.map(b=>parseFloat(b)));	
+		values = values[0].map((a,i)=>[a, (values[1][i]||0)]);
+		for(var i = 0; i < values.length-1; i++) processed.push([values[i], values[i+1]]);
+		allPaths.push(processed);
+	}
+
+	var linePaths = Array.from(el.getElementsByTagName("line"));
+	for(var k = 0; k < linePaths.length; k++) {
+		var path = linePaths[k];
+		var line = [[parseFloat(path.getAttribute("x1")), parseFloat(path.getAttribute("y1"))],
+				[parseFloat(path.getAttribute("x2")), parseFloat(path.getAttribute("y2"))]];
+		allPaths.push([line].concat([line.slice().reverse()]));
+	}
+
 	var flat = allPaths.reduce((a,b)=>a.concat(b)).reduce((a,b)=>a.concat(b));
 	flat = flat[0].map((a,i)=>flat.map(b=>b[i]));
 	var range = [Math.max.apply(null, flat[0]), Math.max.apply(null, flat[1])];
