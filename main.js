@@ -103,7 +103,7 @@ document.querySelectorAll("#clickFile input")[0].onchange = function() {
 		reader.onload = function() {
 			var el = document.createElement("div");
 			el.innerHTML = reader.result;
-			svg = Array.from(el.getElementsByTagName("path")).map(a=>a.getAttribute("d").replace(/(\n|\t)/g,"")).reduce((a,b)=>a.concat(b));
+			svg = Array.from(el.getElementsByTagName("path")).map(a=>a.getAttribute("d").replace(/(\n|\t)/g,"")).map(a=>a[0].toUpperCase() + a.substring(1)).reduce((a,b)=>a.concat(b));
 			var [paths, range] = processSVG(svg);
 			var oneSet = {
 				"name": file.name.replace(".svg","").substring(0,15),
@@ -121,15 +121,18 @@ document.querySelectorAll("#clickFile input")[0].onchange = function() {
 }
 
 function fileDrop(e) {
+
 	e.preventDefault();
 	document.getElementById("setCont").className = "";
 	if(!e.dataTransfer.items) return;
+	console.log(e.dataTransfer.items)
 	var diff = allSets.length;
 	for (var i = 0; i < e.dataTransfer.items.length; i++) {
-      	if (e.dataTransfer.items[i].kind === 'file') {
+		var thisItem = e.dataTransfer.items[i];
+      	if (thisItem.kind === 'file') {
       		loadSVGStatus(true);
       		setTimeout(function() {
-	     		var file = e.dataTransfer.items[i].getAsFile();
+	     		var file = thisItem.getAsFile();
 	     		if(file.name.search(".svg") === -1) {
 	     			alert("This file is not an svg! Please select another file.");
 	     			loadSVGStatus(false);
@@ -913,6 +916,8 @@ function processSVG(svg) {
 		"A": 3
 	};
 	var allPaths = svg.replace(/z/gi,"").split(/(?=M)/gi);
+	console.log(allPaths.length);
+	var lastPoint = [0,0];
 	for(var k = 0; k < allPaths.length; k++) {
 		var processed = [];
 		var arr = allPaths[k].split(/(?=[a-z])/gi);
@@ -926,11 +931,12 @@ function processSVG(svg) {
 				values = values[0].map((a,i)=>[a, (values[1][i]||0)]);
 				if(command.toUpperCase() === "V") values.reverse();
 			} else {
-				values = [
+				alert("The A path command in the SVG is not supported! Please modify or change the SVG file to not contain the A command.")
+				/*values = [
 					values.filter((a,i)=>i%7===0||i%4===1),
 					values.filter((a,i)=>i%7===2||i%7===3||i%7===4),
 					values.filter((a,i)=>i%7===5||i%7===6)
-				].map(a=>a.map(b=>parseFloat(b)));
+				].map(a=>a.map(b=>parseFloat(b)));*/
 			}
 			var len = commLength[command.toUpperCase()];
 			if(values.length !== len) {
@@ -941,8 +947,8 @@ function processSVG(svg) {
 				commList.push([command].concat(values));
 			}
 		}
-
-		var lastPoint = [0,0];
+		console.log([commList, k]);
+		
 		for(var i = 0; i < commList.length; i++) {
 			var command = commList[i][0];
 			var rel = false;
@@ -954,14 +960,15 @@ function processSVG(svg) {
 			var offset = relOff(arrOp(lastPoint, "*", rel), points);
 			if(command === "M") {
 				lastPoint = offset[0];
-			} else if(command === "T") {
-				var lastSet = processed[processed.length-1];
-				var newBez = arrOp(arrOp(2,"*",lastSet[2]), "-", lastSet[1]);
-				processed.push([lastPoint].concat([newBez]).concat(offset));
-				lastPoint = processed[processed.length-1].slice().reverse()[0];
-			} else if(command === "S") {
-				var lastSet = processed[processed.length-1];
-				var newBez = arrOp(arrOp(2,"*",lastSet[3]), "-", lastSet[2]);
+				console.log(lastPoint);
+			} else if(command === "T" || command === "S") {
+				var lastSet = processed[processed.length-1] || [lastPoint];
+				var len = lastSet.length;
+				if(len < 3) {
+					var newBez = lastPoint;
+				} else {
+					var newBez = arrOp(arrOp(2, "*", arrOp(lastSet[len-1], "-", lastSet[len-2])), "+", lastPoint);
+				}
 				processed.push([lastPoint].concat([newBez]).concat(offset));
 				lastPoint = processed[processed.length-1].slice().reverse()[0];
 			} else if(command === "A") {
@@ -971,7 +978,9 @@ function processSVG(svg) {
 				processed.push([lastPoint].concat(offset));
 				lastPoint = processed[processed.length-1].slice().reverse()[0];
 			}
+
 		}
+		if(k === 0) console.log(processed);
 		allPaths[k] = processed;
 	}
 	var flat = allPaths.reduce((a,b)=>a.concat(b)).reduce((a,b)=>a.concat(b));
