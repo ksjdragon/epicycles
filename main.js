@@ -120,14 +120,19 @@ document.querySelectorAll("#clickFile input")[0].onchange = function() {
 function fileDrop(e) {
 	e.preventDefault();
 	document.getElementById("setCont").className = "";
+	if(e.dataTransfer.items) {
+		type = e.dataTransfer.items; 
+	} else {
+		type = e.dataTransfer.files;
+	}
 	if(!e.dataTransfer.items) return;
 	var diff = allSets.length;
-	for (var i = 0; i < e.dataTransfer.items.length; i++) {
-		var thisItem = e.dataTransfer.items[i];
+	for (var i = 0; i < type.length; i++) {
+		var thisItem = type[i];
       	if (thisItem.kind === 'file') {
       		loadSVGStatus(true);
+      		var file = thisItem.getAsFile();
       		setTimeout(function() {
-	     		var file = thisItem.getAsFile();
 	     		if(file.name.search(".svg") === -1) {
 	     			alert("This file is not an svg! Please select another file.");
 	     			loadSVGStatus(false);
@@ -148,10 +153,15 @@ function fileDrop(e) {
 	     			if(allSets.length-diff === e.dataTransfer.items.length) updateSidebar();
 	     		}
 	     		reader.readAsText(file);
+	     		if(e.dataTransfer.items) {
+	     			e.dataTransfer.items.clear();
+	     		} else {
+	     			e.dataTransfer.clearData();
+	     		}
       		}, 10);
       	}
     }
-	e.dataTransfer.items.clear();
+	
 }
 
 function fileDrag(e) {
