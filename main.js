@@ -126,42 +126,38 @@ function fileDrop(e) {
 		type = e.dataTransfer.files;
 	}
 	if(!e.dataTransfer.items) return;
-	var diff = allSets.length;
+	loadSVGStatus(true);
 	for (var i = 0; i < type.length; i++) {
 		var thisItem = type[i];
       	if (thisItem.kind === 'file') {
-      		loadSVGStatus(true);
       		var file = thisItem.getAsFile();
-      		setTimeout(function() {
-	     		if(file.name.search(".svg") === -1) {
-	     			alert("This file is not an svg! Please select another file.");
-	     			loadSVGStatus(false);
-	     			return;
-	     		}
-	     		var reader = new FileReader();
-	     		reader.onload = function() {
-					var [paths, range] = processSVG(reader.result);
-	     			var oneSet = {
-	     				"name": file.name.replace(".svg",""),
-	     				"color": graphColors[Math.floor(Math.random()*graphColors.length)],
-	     				"paths": paths,
-	     				"range": range,
-	     				"eq": [],
-	     				"calcArray": []
-	     			};
-	     			allSets.push(oneSet);
-	     			if(allSets.length-diff === e.dataTransfer.items.length) updateSidebar();
-	     		}
-	     		reader.readAsText(file);
-	     		if(e.dataTransfer.items) {
-	     			e.dataTransfer.items.clear();
-	     		} else {
-	     			e.dataTransfer.clearData();
-	     		}
-      		}, 10);
+     		if(file.name.search(".svg") === -1) {
+     			alert("This file is not an svg! Please select another file.");
+     			loadSVGStatus(false);
+     			return;
+     		}
+     		var reader = new FileReader();
+     		reader.onload = function() {
+				var [paths, range] = processSVG(reader.result);
+     			var oneSet = {
+     				"name": file.name.replace(".svg",""),
+     				"color": graphColors[Math.floor(Math.random()*graphColors.length)],
+     				"paths": paths,
+     				"range": range,
+     				"eq": [],
+     				"calcArray": []
+     			};
+     			allSets.push(oneSet);
+     		}
+     		reader.readAsText(file);
+     		if(e.dataTransfer.items) {
+     			e.dataTransfer.items.clear();
+     		} else {
+     			e.dataTransfer.clearData();
+     		}	
       	}
     }
-	
+    updateSidebar();
 }
 
 function fileDrag(e) {
