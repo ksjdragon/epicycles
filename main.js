@@ -119,7 +119,7 @@ document.querySelectorAll("#clickFile input")[0].onchange = function() {
 
 function fileDrop(e) {
 	e.preventDefault();
-	document.getElementById("setCont").className = "";
+	document.getElementById("setCont").className = "transition";
 	if(e.dataTransfer.items) {
 		type = e.dataTransfer.items; 
 	} else {
@@ -162,12 +162,12 @@ function fileDrop(e) {
 
 function fileDrag(e) {
 	e.preventDefault();
-	document.getElementById("setCont").className = "ondrag";
+	document.getElementById("setCont").className = "ondrag transition";
 }
 
 function fileDragLeave(e) {
 	e.preventDefault();
-	document.getElementById("setCont").className = "";
+	document.getElementById("setCont").className = "transition";
 }
 
 function loadSVGStatus(processing) {
